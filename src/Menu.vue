@@ -76,6 +76,11 @@ onMounted(loadMenu);
         @change-category="scrollToCategory" 
       />
     </header>
+
+    <section class="hero">
+      <p class="hero-line">Odkryj smaki takich jakich jeszcze nie próbowałeś!</p>
+    </section>
+
     <main class="menu-container">
       <p v-if="menuLoading" class="menu-status">Ładowanie menu…</p>
       <p v-else-if="menuError" class="menu-status-error">{{ menuError }}</p>
@@ -111,22 +116,35 @@ onMounted(loadMenu);
 
 .header {
   position: sticky;
-  top: 70px;
+  top: 72px;
   z-index: 100;
-  background: #fff;
+}
+
+.hero {
+  background: #6c3c0c;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+}
+
+.hero-line {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
 }
 
 .menu-container {
-  max-width: 1200px;
-  padding: 15px 15px;
+  max-width: 1600px;
+  padding: 0px 15px;
+  border-radius: 10px;
 }
 
 .category-section {
-  scroll-margin-top: 150px; 
+  scroll-margin-top: 165px; 
 }
 
 .category-title {
-  margin: 24px 0 16px;
+  margin: 15px 0 15px;
   font-size: 1.25rem;
   border-left: 4px solid #e30613;
   padding-left: 10px;
@@ -135,7 +153,7 @@ onMounted(loadMenu);
 .items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  gap: 15px;
 }
 
 .menu-status {

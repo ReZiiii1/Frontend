@@ -39,7 +39,6 @@ const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease; 
 }
 
@@ -56,7 +55,7 @@ const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
 }
 
 .item-info {
-  padding: 16px;
+  padding: 15px;
 }
 
 .item-info h3 {
@@ -109,15 +108,5 @@ const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
 
 .add-btn:active {
   transform: scale(0.9);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
