@@ -1,12 +1,13 @@
 import { createApp } from 'vue'
 import { registerPlugins } from '@/plugins'
-
-import Strona_Glowna from './Strona_Glowna.vue'
+import App from './App.vue'
+import router from '@/router'
 
 import 'unfonts.css'
 
-const app = createApp(Strona_Glowna)
+const app = createApp(App)
 
 registerPlugins(app)
+app.use(router)
 
 app.mount('#app')
