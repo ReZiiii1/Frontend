@@ -2,24 +2,9 @@
 import { ref, computed, onMounted } from 'vue';
 import CategoryNav from './components/CategoryNav.vue';
 import MenuCard from './components/MenuCard.vue';
+import { categories } from './utils/Categories';
 
 const apiBase = 'https://localhost:7294';
-const CATEGORY_NAMES = [
-  'Zupy',
-  'Danie główne',
-  'Burgery',
-  'Dodatki',
-  'Dla dzieci',
-  'Napoje ciepłe',
-  'Napoje zimne',
-  'Alkohole',
-  'Piwo kuflowe',
-];
-
-const categories = CATEGORY_NAMES.map((name) => ({
-  id: name,
-  name,
-}));
 
 const productsRaw = ref([]);
 const menuLoading = ref(true);
@@ -29,17 +14,15 @@ const activeCategory = ref(categories[0].id);
 const menuData = computed(() => {
   const normalize = (v) => (v ?? '').trim().toLowerCase();
   
-  return CATEGORY_NAMES.map(name => ({
-    id: name,
-    categoryName: name,
+  return categories.map(cat => ({
+    id: cat.id,
+    categoryName: cat.name,
     items: productsRaw.value
-      .filter(p => normalize(p.kategoria) === normalize(name))
+      .filter(p => normalize(p.kategoria) === normalize(cat.name))
       .map(p => ({
-        ...p,
-        parsedPrice: typeof p.cena === 'number' 
-          ? p.cena 
+        ...p, parsedPrice: typeof p.cena === 'number' ? p.cena 
           : parseFloat(String(p.cena).replace(',', '.')),
-        imageUrl: p.zdjecie ? `${apiBase}/images/${p.zdjecie}`: null,
+        imageUrl: p.zdjecie || null,
       }))
   }));
 });
