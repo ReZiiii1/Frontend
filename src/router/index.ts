@@ -19,6 +19,11 @@ const router = createRouter({
       component: () => import('@/views/MenuView.vue'),
     },
     {
+      path: '/restauracje',
+      name: 'restauracje',
+      component: () => import('@/views/RestaurantView.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/',
     },
