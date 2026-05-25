@@ -6,16 +6,34 @@
       role="img"
       :aria-label="item.miejscowosc"
     ></div>
+
     <div class="place-info">
-      <h3>{{ item.miejscowosc }}</h3>
-      <p class="localization">
-        {{ item.ulica }} {{ item.nr_budynku }}{{ item.nr_lokalu ? `/${item.nr_lokalu}` : '' }}
-      </p>
+      
+        <div>
+            <h3>{{ item.miejscowosc }}</h3>
+            <p class="localization">
+                {{ item.ulica }} {{ item.nr_budynku }}{{ item.nr_lokalu ? `/${item.nr_lokalu}` : '' }}
+            </p>
+        </div>
+    
+        <div class="navigation-container">
+            <a 
+                v-if="item.szerokosc_geo && item.dlugosc_geo"
+                :href="`https://www.google.com/maps/search/?api=1&query=${item.szerokosc_geo},${item.dlugosc_geo}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="nav-button"
+            >
+            <Icon icon="gis:route" color="white" width="27" height="27" />
+            </a>
+        </div>
     </div>
   </article>
 </template>
 
 <script setup>
+import { Icon } from '@iconify/vue';
+
 const props = defineProps({
   item: { 
     type: Object, 
@@ -30,6 +48,7 @@ const props = defineProps({
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease;
+  position: relative;
 }
 
 .restaurant-card:hover {
@@ -41,10 +60,16 @@ const props = defineProps({
   background-size: cover;
   background-position: center;
   width: 100%;
+  position: relative;
 }
 
 .place-info {
   padding: 15px;
+  display: flex;
+  align-items: center;       
+  justify-content: space-between; 
+  gap: 15px;                 
+  flex-grow: 1;
 }
 
 .place-info h3 {
@@ -59,6 +84,35 @@ const props = defineProps({
   font-size: 0.9rem;
   color: #666;
   line-height: 1.45;
-  margin: 0 0 15px 0;
+  margin: 0;
+}
+
+.navigation-container {
+  opacity: 0;                
+  transform: translateX(15px); 
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+
+.restaurant-card:hover .navigation-container {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.nav-button {
+  background-color: #e30613;
+  color: white;
+  width:50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.nav-button:hover {
+  background-color: #b8050f;
+  transform: scale(1.1);
 }
 </style>

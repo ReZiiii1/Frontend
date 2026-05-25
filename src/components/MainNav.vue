@@ -23,8 +23,8 @@
 
       <div class="nav-right">
         <button type="button" class="order-online-btn">
-          <Icon icon="ic:round-shopping-basket" width="20" />
-          ZAMÓW ONLINE
+          <Icon icon="fluent-emoji-flat:unlocked" width="20" />
+          ZALOGUJ SIĘ
         </button>
         <button
           type="button"

@@ -58,7 +58,7 @@ onMounted(loadRestaurants);
 
       <div v-else>
         <p v-if="filteredRestaurants.length === 0" class="status-msg no-results">
-          Nie znaleźliśmy żadnej restauracji w wyszukiwanej przez ciebie miejscowości. <Icon icon="pixel:face-sad-solid" color="white" />
+          Nie znaleźliśmy żadnej restauracji w wyszukiwanej przez ciebie miejscowości. <Icon icon="pixel:face-sad-solid" color="white" width="15" />
         </p>
 
       <div v-else class="items-grid">
@@ -112,6 +112,7 @@ onMounted(loadRestaurants);
   text-align: center;
   padding: 20px;
   color: #666;
+  font-size: 1.1rem;
 }
 
 .status-msg-error {
