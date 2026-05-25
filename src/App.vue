@@ -26,7 +26,7 @@ import MainNav from '@/components/MainNav.vue'
 .header {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 101;
   background: #fff;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }

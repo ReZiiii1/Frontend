@@ -141,12 +141,16 @@ function closeNav() {
     flex-direction: column;
     background: #3a2613;
     padding: 16px;
-    gap: 12px;
+    gap: 19px;
     z-index: 101;
+    display: none;
+    grid-template-columns: repeat(3, 1fr);
+    justify-items: center;
+    align-items: center;
   }
 
   .nav-links.open {
-    display: flex;
+    display: grid;
   }
 
   .nav-content {
