@@ -1,12 +1,25 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import RestaurantCard from './components/RestaurantCard.vue';
+import RestaurantSearch from './components/RestaurantSearch.vue';
+import {Icon} from '@iconify/vue';
 
 const apiBase = 'https://localhost:7294';
 
 const restaurants = ref([]);
 const loading = ref(true);
+const searchQuery = ref('');
 const error = ref('');
+
+const filteredRestaurants = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim();
+  
+  if (!query) return restaurants.value; 
+
+  return restaurants.value.filter(r => {
+    return r.miejscowosc && r.miejscowosc.toLowerCase().includes(query);
+  });
+});
 
 async function loadRestaurants() {
   loading.value = true;
@@ -36,18 +49,25 @@ onMounted(loadRestaurants);
 
     <section class="hero">
       <p class="hero-line">Znajdź swoją ulubioną restaurację w okolicy!</p>
+      <RestaurantSearch v-model="searchQuery" />
     </section>
 
     <main class="restaurants-container">
       <p v-if="loading" class="status-msg">Ładowanie listy restauracji…</p>
       <p v-else-if="error" class="status-msg-error">{{ error }}</p>
 
+      <div v-else>
+        <p v-if="filteredRestaurants.length === 0" class="status-msg no-results">
+          Nie znaleźliśmy żadnej restauracji w wyszukiwanej przez ciebie miejscowości. <Icon icon="pixel:face-sad-solid" color="white" />
+        </p>
+
       <div v-else class="items-grid">
         <RestaurantCard
-          v-for="restaurant in restaurants" 
+          v-for="restaurant in filteredRestaurants" 
           :key="restaurant.id" 
           :item="restaurant"
         />
+      </div>
       </div>
     </main>
   </div>
@@ -67,6 +87,7 @@ onMounted(loadRestaurants);
   color: #fff;
   text-align: center;
   padding: 15px;
+  border-bottom: 3px solid #e30613;
 }
 
 .hero-line {
@@ -90,10 +111,11 @@ onMounted(loadRestaurants);
 .status-msg {
   text-align: center;
   padding: 20px;
-  color: #fff;
+  color: #666;
 }
 
 .status-msg-error {
+  font-size: 1.3rem;
   text-align: center;
   padding: 20px;
   color: #e30613;
