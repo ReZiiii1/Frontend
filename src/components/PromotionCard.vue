@@ -1,5 +1,7 @@
 <template>
-  <article class="menu-card" :class="{ 'locked-card': item.isLocked }">
+  <article class="menu-card" :class="{ 'locked-card': item.isLocked }" 
+  @mouseenter="isHovered = true"
+  @mouseleave="isHovered = false">
     <div
       class="item-image"
       :style="{ backgroundImage: `url(${item.imageUrl})` }"
@@ -18,15 +20,25 @@
       
       <div class="price-row" :class="{ 'flex-column': item.isLocked }">
         <span class="price">
-          {{ item.parsedPrice === 0 ? 'GRATIS' : `${formatPrice(item.parsedPrice)} zł` }}
+          {{ formatPrice(item.parsedPrice) }} zł
         </span>
         
-        <button v-if="!item.isLocked" class="add-btn" @click="$emit('add-to-cart', item)" title="Dodaj do zamówienia">
-          <Icon icon="mdi:plus" width="24" height="24" />
-        </button>
+       <div v-if="!item.isLocked" class="btn-container">
+          <Transition name="fade">
+            <button 
+              v-show="isHovered" 
+              type="button" 
+              class="add-btn" 
+              @click="$emit('add-to-cart', item)"
+              title="Dodaj do zamówienia"
+            >
+              <Icon icon="fe:add-cart" width="24" height="24" />
+            </button>
+          </Transition>
+        </div>
 
         <button v-else class="login-required-btn" @click="$emit('add-to-cart', item)">
-          <Icon icon="mdi:login" width="18" height="18" />
+          <Icon icon="fe:add-cart" width="24" height="24" />
           Zaloguj się, aby skorzystać
         </button>
       </div>
@@ -35,6 +47,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { Icon } from '@iconify/vue';
 
 const props = defineProps({
@@ -42,6 +55,8 @@ const props = defineProps({
 });
 
 defineEmits(['add-to-cart']);
+
+const isHovered = ref(false);
 
 const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
   minimumFractionDigits: 2,
@@ -101,6 +116,14 @@ const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
   font-weight: 800;
   color: #e30613;
   font-size: 0.95rem;
+}
+
+.btn-container {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .add-btn {

@@ -4,7 +4,7 @@
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <h1>Wyjątkowe Promocje <span class="brand-name">Manticore</span></h1>
-        <p class="hero-subtitle">Smak Orientu w niższych cenach. Wybierz coś dla siebie i zamawiaj taniej!</p>
+        <p class="hero-subtitle">Super oferty w niższych cenach. Wybierz coś dla siebie i zamawiaj taniej!</p>
       </div>
     </header>
 
@@ -40,6 +40,9 @@
         </button>
       </div>
     </div>
+
+    <CartPopup />
+
     <AuthModal 
       v-if="isAuthModalOpen" 
       @close="isAuthModalOpen = false"
@@ -54,7 +57,11 @@
 import { ref, onMounted } from 'vue';
 import PromotionCard from '@/components/PromotionCard.vue';
 import AuthModal from '@/components/AuthModal.vue';
+import CartPopup from '@/components/CartPopup.vue';
 import { Icon } from '@iconify/vue';
+import { useCart } from '@/store/cart';
+
+const { addToCart } = useCart();
 
 const showMore = ref(false);
 const isAuthModalOpen = ref(false);
@@ -63,26 +70,26 @@ const isLoggedIn = ref(false);
 const basicPromotions = ref([
   {
     id: 1,
-    nazwa: "Zestaw Sfinksa dla dwojga",
-    opis: "2x kultowa Shoarma (klasyczna lub pieczona), duża porcja frytek, zestaw surówek i 2x sosy gratis!",
-    parsedPrice: 69.99,
-    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80",
+    nazwa: "Zestaw dla dziecka",
+    opis: "Nuggetsy z frytkami i colą 0,33l w super cenie. Idealny zestaw dla najmłodszych smakoszy.",
+    parsedPrice: 30.49,
+    imageUrl: "https://heisenburger.pl/uploads/images/products/org/11.jpg",
     isLocked: false 
   },
   {
     id: 2,
-    nazwa: "Studencki Czwartek z Manticorą",
-    opis: "Dowolna rolada z mięsem, frytki oraz napój 0.33l za okazaniem legitymacji studenckiej.",
-    parsedPrice: 24.50,
-    imageUrl: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=500&q=80",
+    nazwa: "2x Burger Wege",
+    opis: "Zniżka 30% na drugiego burgera Wege.",
+    parsedPrice: 53.35,
+    imageUrl: "https://www.frosta.pl/wp-content/uploads/sites/4/2020/11/shutterstock_794244805_Wege-burger-z-guacamole-scaled.jpg",
     isLocked: false
   },
   {
     id: 3,
     nazwa: "Chrupiący Box Przekąsek",
-    opis: "Krążki cebulowe, skrzydełka w panierce, serki chilli-cheese i 3 autorskie sosy Manticore.",
+    opis: "Frytki, kurczaczki w sosie ostrym, krązki cebulowe i 2 autorskie sosy.",
     parsedPrice: 34.99,
-    imageUrl: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=500&q=80",
+    imageUrl: "https://papupos.s3.amazonaws.com/media/company/143b6abe-d23b-406d-854d-1a2412edd69d/images/c41d545b-542a-4492-a7e4-dd5f01e5be11.png",
     isLocked: false
   }
 ]);
@@ -90,25 +97,25 @@ const basicPromotions = ref([
 const premiumPromotions = ref([
   {
     id: 4,
-    nazwa: "Kultowa Shoarma -50% na drugą",
-    opis: "Zamów jedną dowolną Shoarmę gigant, a drugą (klasyczną) otrzymasz za pół ceny. Oferta dla klubowiczów.",
-    parsedPrice: 19.99,
-    imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80",
-    isLocked: true // 
+    nazwa: "Łosoś Grillowany",
+    opis: "Zniżka 9zł na najpyszniejszą rybę w Polsce. Oferta dla klubowiczów.",
+    parsedPrice: 43.00,
+    imageUrl: "https://saproduwielbiaplmmedia.blob.core.windows.net/media/recipes/images/1699973472780.jpeg",
+    isLocked: true 
   },
   {
     id: 5,
-    nazwa: "Darmowy Deser do Dania Głównego",
-    opis: "Wybierz dowolną pozycję z menu głównego, a słodką tradycyjną Bakławę dorzucimy całkowicie gratis.",
-    parsedPrice: 0.00,
-    imageUrl: "https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=500&q=80",
+    nazwa: "Frytki z batata",
+    opis: "Zniżka 5zł na słodkie chrupiące frytki z batata. Oferta dla klubowiczów.",
+    parsedPrice: 9.00,
+    imageUrl: "https://az.przepisy.pl/www-przepisy-pl/www.przepisy.pl/przepisy3ii/img/variants/800x0/frytki_z_marchewki_0994803.jpg",
     isLocked: true
   },
   {
     id: 6,
-    nazwa: "Festwiwal Burgerów: Zestaw XXL",
-    opis: "Chrupiący burger z orientalnym mięsem, kręcone frytki oraz nielimitowana dolewka Pepsi w restauracji.",
-    parsedPrice: 39.00,
+    nazwa: "Burger klasyczny XL",
+    opis: "Powiększony o 80gr mięsa burger klasyczny. Oferta dla klubowiczów.",
+    parsedPrice: 32.99,
     imageUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80",
     isLocked: true
   }
@@ -135,12 +142,12 @@ function checkLoginStatus() {
 }
 
 const handleAddToCart = (item) => {
-  alert(`Dodano do zamówienia: ${item.nazwa}`);
+  addToCart(item);
 };
 
 const handlePremiumClick = (item) => {
   if (isLoggedIn.value) {
-    alert(`Dodano ofertę klubową: ${item.nazwa}`);
+    addToCart(item);
   } else {
     isAuthModalOpen.value = true;
   }

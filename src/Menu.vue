@@ -2,9 +2,13 @@
 import { ref, computed, onMounted } from 'vue';
 import CategoryNav from './components/CategoryNav.vue';
 import MenuCard from './components/MenuCard.vue';
+import CartPopup from './components/CartPopup.vue'; 
 import { categories } from './utils/Categories';
+import { useCart } from './store/cart';
 
 const apiBase = 'https://localhost:7294';
+
+const { addToCart } = useCart();
 
 const productsRaw = ref([]);
 const menuLoading = ref(true);
@@ -39,6 +43,10 @@ async function loadMenu() {
   } finally {
     menuLoading.value = false;
   }
+}
+
+function handleAddToCart(item) {
+  addToCart(item);
 }
 
 function scrollToCategory(id) {
@@ -81,10 +89,13 @@ onMounted(loadMenu);
             v-for="item in cat.items" 
             :key="item.id" 
             :item="item"
+            @add-to-cart="handleAddToCart"
           />
         </div>
       </section>
     </main>
+
+    <CartPopup />
   </div>
 </template>
 

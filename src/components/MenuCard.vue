@@ -14,7 +14,17 @@
       <h3>{{ item.nazwa }}</h3>
       <p class="description">{{ item.opis }}</p>
       <div class="price-row">
-        <span class="price">{{ formatPrice(item.parsedPrice) }} zł</span>
+        <span class="price">{{ formatPrice(item.parsedPrice) }} zł</span> 
+        <Transition name="fade">
+          <button 
+            v-show="isHovered" 
+            type="button" 
+            class="add-btn" 
+            @click="$emit('add-to-cart', item)"
+          >
+            <Icon icon="fe:add-cart" width="24" height="24" />
+          </button>
+        </Transition>
       </div>
     </div>
   </article>
@@ -22,10 +32,15 @@
 
 <script setup>
 import { ref } from 'vue';
+import { Icon } from '@iconify/vue';
 
 const props = defineProps({
   item: { type: Object, required: true }
 });
+
+const emit = defineEmits(['add-to-cart']);
+
+const isHovered = ref(false);
 
 const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
   minimumFractionDigits: 2,
@@ -34,7 +49,6 @@ const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
 </script>
 
 <style scoped>
-
 .menu-card {
   background: #fff;
   border-radius: 12px;
