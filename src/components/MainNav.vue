@@ -1,56 +1,121 @@
 <template>
-  <nav class="main-nav">
-    <div class="nav-content">
-      <RouterLink to="/" class="brand-name">MANTICORE</RouterLink>
+  <div class="navbar-wrapper">
+    <nav class="main-nav">
+      <div class="nav-content">
+        <RouterLink to="/" class="brand-name">MANTICORE</RouterLink>
 
-      <ul class="nav-links" :class="{ open: isNavOpen }">
-        <li>
-          <RouterLink to="/" @click="closeNav">STRONA GŁÓWNA</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/menu" @click="closeNav">NASZE MENU</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/promocje" @click="closeNav">PROMOCJE</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/restauracje" @click="closeNav">RESTAURACJE</RouterLink>
-        </li>
-        <li>
-          <RouterLink to="/o-nas" @click="closeNav">O NAS</RouterLink>
-        </li>
-      </ul>
+        <ul class="nav-links" :class="{ open: isNavOpen }">
+          <li>
+            <RouterLink to="/" @click="closeNav">STRONA GŁÓWNA</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/menu" @click="closeNav">NASZE MENU</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/promocje" @click="closeNav">PROMOCJE</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/restauracje" @click="closeNav">RESTAURACJE</RouterLink>
+          </li>
+          <li>
+            <RouterLink to="/o-nas" @click="closeNav">O NAS</RouterLink>
+          </li>
+        </ul>
 
-      <div class="nav-right">
-        <button type="button" class="order-online-btn">
-          <Icon icon="fluent-emoji-flat:unlocked" width="20" />
-          ZALOGUJ SIĘ
-        </button>
-        <button
-          type="button"
-          class="menu-toggle"
-          aria-label="Menu"
-          @click="isNavOpen = !isNavOpen"
-        >
-          <Icon
-            :icon="isNavOpen ? 'material-symbols:close' : 'material-symbols:menu'"
-            width="32"
-          />
-        </button>
+        <div class="nav-right">
+          <button 
+            v-if="!isLoggedIn"
+            type="button" 
+            class="order-online-btn"
+            @click="isAuthModalOpen = true"
+          >
+            <Icon icon="fluent-emoji-flat:locked" width="20" />
+            ZALOGUJ SIĘ
+          </button>
+
+          <button 
+            v-else
+            type="button" 
+            class="order-online-btn logout-btn"
+            @click="handleLogout"
+          >
+            <Icon icon="fluent-emoji-flat:unlocked" width="20" />
+            WYLOGUJ ({{ userEmail.split('@')[0] }})
+          </button>
+
+          <button
+            type="button"
+            class="menu-toggle"
+            aria-label="Menu"
+            @click="isNavOpen = !isNavOpen"
+          >
+            <Icon
+              :icon="isNavOpen ? 'material-symbols:close' : 'material-symbols:menu'"
+              width="32"
+            />
+          </button>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
+
+    <AuthModal 
+      v-if="isAuthModalOpen" 
+      @close="isAuthModalOpen = false"
+      @auth-success="handleAuthSuccess"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import AuthModal from './AuthModal.vue'
 
 const isNavOpen = ref(false)
+const isAuthModalOpen = ref(false)
+const isLoggedIn = ref(false)
+const userEmail = ref('')
 
 function closeNav() {
   isNavOpen.value = false
+}
+
+onMounted(() => {
+  checkLoginStatus()
+  window.addEventListener('storage', checkLoginStatus)
+})
+
+function checkLoginStatus() {
+  const savedEmail = localStorage.getItem('manticore_user')
+  if (savedEmail) {
+    isLoggedIn.value = true
+    userEmail.value = savedEmail
+  } else {
+    isLoggedIn.value = false
+    userEmail.value = ''
+  }
+}
+
+function handleAuthSuccess(userData: { email: string }) {
+  isAuthModalOpen.value = false
+  localStorage.setItem('manticore_user', userData.email)
+  checkLoginStatus()
+  alert(`Zalogowano pomyślnie jako: ${userData.email}`)
+  window.dispatchEvent(new Event('storage'))
+}
+
+function handleLogout() {
+  localStorage.removeItem('manticore_user')
+  checkLoginStatus()
+  alert('Wylogowano z restauracji Manticore.')
+  window.dispatchEvent(new Event('storage'))
+}
+</script>
+
+<script lang="ts">
+export default {
+  name: 'NavbarComponent'
 }
 </script>
 
@@ -75,7 +140,8 @@ function closeNav() {
   font-size: 1.4rem;
   font-weight: 900;
   letter-spacing: 2px;
-  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  color: #ffc107;
   text-decoration: none;
 }
 
@@ -111,6 +177,20 @@ function closeNav() {
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.order-online-btn:hover {
+  background-color: #b00010;
+}
+
+.logout-btn {
+  background-color: #4a3b2c;
+  border: 1px solid #e30613;
+}
+
+.logout-btn:hover {
+  background-color: #e30613;
 }
 
 .menu-toggle {

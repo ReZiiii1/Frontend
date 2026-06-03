@@ -1,0 +1,288 @@
+<template>
+  <div class="promotions-page">
+    <header class="promotions-hero">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1>Wyjątkowe Promocje <span class="brand-name">Manticore</span></h1>
+        <p class="hero-subtitle">Smak Orientu w niższych cenach. Wybierz coś dla siebie i zamawiaj taniej!</p>
+      </div>
+    </header>
+
+    <div class="promotions-container">
+      <div class="promotions-grid">
+        <PromotionCard 
+          v-for="promo in basicPromotions" 
+          :key="promo.id" 
+          :item="promo"
+          @add-to-cart="handleAddToCart"
+        />
+      </div>
+
+      <div v-if="showMore" class="premium-section">
+        <div class="section-divider">
+          <span>Strefa Klubowicza Manticore</span>
+        </div>
+        
+        <div class="promotions-grid">
+          <PromotionCard 
+            v-for="promo in premiumPromotions" 
+            :key="promo.id" 
+            :item="promo"
+            @add-to-cart="handlePremiumClick"
+          />
+        </div>
+      </div>
+
+      <div class="actions-row" v-if="!showMore">
+        <button class="show-more-btn" @click="showMore = true">
+          Pokaż więcej promocji
+          <Icon icon="mdi:chevron-down" width="20" height="20" />
+        </button>
+      </div>
+    </div>
+    <AuthModal 
+      v-if="isAuthModalOpen" 
+      @close="isAuthModalOpen = false"
+      @auth-success="handleAuthSuccess"
+    />
+  </div>
+  
+  
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import PromotionCard from '@/components/PromotionCard.vue';
+import AuthModal from '@/components/AuthModal.vue';
+import { Icon } from '@iconify/vue';
+
+const showMore = ref(false);
+const isAuthModalOpen = ref(false);
+const isLoggedIn = ref(false);
+
+const basicPromotions = ref([
+  {
+    id: 1,
+    nazwa: "Zestaw Sfinksa dla dwojga",
+    opis: "2x kultowa Shoarma (klasyczna lub pieczona), duża porcja frytek, zestaw surówek i 2x sosy gratis!",
+    parsedPrice: 69.99,
+    imageUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=500&q=80",
+    isLocked: false 
+  },
+  {
+    id: 2,
+    nazwa: "Studencki Czwartek z Manticorą",
+    opis: "Dowolna rolada z mięsem, frytki oraz napój 0.33l za okazaniem legitymacji studenckiej.",
+    parsedPrice: 24.50,
+    imageUrl: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=500&q=80",
+    isLocked: false
+  },
+  {
+    id: 3,
+    nazwa: "Chrupiący Box Przekąsek",
+    opis: "Krążki cebulowe, skrzydełka w panierce, serki chilli-cheese i 3 autorskie sosy Manticore.",
+    parsedPrice: 34.99,
+    imageUrl: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=500&q=80",
+    isLocked: false
+  }
+]);
+
+const premiumPromotions = ref([
+  {
+    id: 4,
+    nazwa: "Kultowa Shoarma -50% na drugą",
+    opis: "Zamów jedną dowolną Shoarmę gigant, a drugą (klasyczną) otrzymasz za pół ceny. Oferta dla klubowiczów.",
+    parsedPrice: 19.99,
+    imageUrl: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=500&q=80",
+    isLocked: true // 
+  },
+  {
+    id: 5,
+    nazwa: "Darmowy Deser do Dania Głównego",
+    opis: "Wybierz dowolną pozycję z menu głównego, a słodką tradycyjną Bakławę dorzucimy całkowicie gratis.",
+    parsedPrice: 0.00,
+    imageUrl: "https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=500&q=80",
+    isLocked: true
+  },
+  {
+    id: 6,
+    nazwa: "Festwiwal Burgerów: Zestaw XXL",
+    opis: "Chrupiący burger z orientalnym mięsem, kręcone frytki oraz nielimitowana dolewka Pepsi w restauracji.",
+    parsedPrice: 39.00,
+    imageUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80",
+    isLocked: true
+  }
+]);
+
+onMounted(() => {
+  checkLoginStatus();
+  window.addEventListener('storage', checkLoginStatus);
+});
+
+function checkLoginStatus() {
+  const savedEmail = localStorage.getItem('manticore_user');
+  if (savedEmail) {
+    isLoggedIn.value = true;
+    premiumPromotions.value.forEach(promo => {
+      promo.isLocked = false;
+    });
+  } else {
+    isLoggedIn.value = false;
+    premiumPromotions.value.forEach(promo => {
+      promo.isLocked = true;
+    });
+  }
+}
+
+const handleAddToCart = (item) => {
+  alert(`Dodano do zamówienia: ${item.nazwa}`);
+};
+
+const handlePremiumClick = (item) => {
+  if (isLoggedIn.value) {
+    alert(`Dodano ofertę klubową: ${item.nazwa}`);
+  } else {
+    isAuthModalOpen.value = true;
+  }
+};
+
+const handleAuthSuccess = (userData) => {
+  isAuthModalOpen.value = false;
+  localStorage.setItem('manticore_user', userData.email);
+  checkLoginStatus();
+  window.dispatchEvent(new Event('storage'));
+  alert(`Witaj w klubie Manticore! Wszystkie promocje zostały odblokowane.`);
+};
+</script>
+
+<style scoped>
+.promotions-page {
+  background-color: #fcf9f5; 
+  min-height: 100vh;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.promotions-hero {
+  position: relative;
+  background-image: url('https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  padding: 80px 20px;
+  text-align: center;
+  color: #fff;
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(180deg, rgba(34, 34, 34, 0.85) 0%, rgba(20, 20, 20, 0.9) 100%);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.promotions-hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.brand-name {
+  color: #ffc107; 
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: #ddd;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.promotions-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 50px 20px;
+}
+
+.promotions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 35px;
+}
+
+.actions-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+}
+
+.show-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #222;
+  color: #fff;
+  border: 2px solid #222;
+  padding: 14px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.show-more-btn:hover {
+  background-color: transparent;
+  color: #222;
+  transform: translateY(-2px);
+}
+
+.premium-section {
+  margin-top: 60px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-divider::before, .section-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 2px dashed #ccc;
+}
+
+.section-divider:not(:empty)::before {
+  margin-right: .5em;
+}
+
+.section-divider:not(:empty)::after {
+  margin-left: .5em;
+}
+
+.section-divider span {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #e30613;
+  background: #fcf9f5;
+  padding: 0 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
