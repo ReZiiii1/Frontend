@@ -75,12 +75,58 @@ const formData = reactive({
   password: ''
 });
 
-const handleSubmit = () => {
-  if (isLoginMode.value) {
-    emit('auth-success', { email: formData.email });
-  } else {
-    alert("Konto założone pomyślnie! Teraz możesz się zalogować.");
-    isLoginMode.value = true;
+const handleSubmit = async () => {
+  // UWAGA: Zmień port 7234 na taki, jaki masz w swoim Swaggerze!
+  const BACKEND_URL = 'https://localhost:7294/api/auth';
+
+  try {
+    if (isLoginMode.value) {
+      // 1. LOGOWANIE
+      const response = await fetch(`${BACKEND_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Jeśli backend zwrócił np. BadRequest("Błędne hasło!")
+        throw new Error(data.message || 'Błędne dane logowania!');
+      }
+
+      // Jeśli sukces, przekazujemy dane użytkownika wyżej (do Navbaru / Promocji)
+      emit('auth-success', { email: data.email });
+      
+    } else {
+      // 2. REJESTRACJA
+      const response = await fetch(`${BACKEND_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data || 'Nie udało się zarejestrować!');
+      }
+
+      alert("Konto założone pomyślnie w bazie Manticore! Teraz możesz się zalogować.");
+      // Po rejestracji czyścimy hasło i przełączamy okienko na tryb logowania
+      formData.password = '';
+      isLoginMode.value = true;
+    }
+  } catch (error: any) {
+    // Wyświetlamy błąd z backendu użytkownikowi w alercie
+    alert(`Błąd: ${error.message}`);
   }
 };
 
