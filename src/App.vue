@@ -6,12 +6,14 @@
     <main class="page-content">
       <RouterView />
     </main>
+    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import MainNav from '@/components/MainNav.vue'
+import Footer from '@/components/Footer.vue'
 </script>
 
 <style scoped>

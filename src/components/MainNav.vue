@@ -17,9 +17,6 @@
           <li>
             <RouterLink to="/restauracje" @click="closeNav">RESTAURACJE</RouterLink>
           </li>
-          <li>
-            <RouterLink to="/o-nas" @click="closeNav">O NAS</RouterLink>
-          </li>
         </ul>
 
         <div class="nav-right">
