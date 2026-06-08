@@ -64,7 +64,7 @@ import { Icon } from '@iconify/vue';
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'auth-success', userData: { email: string }): void
+  (e: 'auth-success', userData: { email: string; token: string }): void
 }>();
 
 const isLoginMode = ref(true);
@@ -96,7 +96,7 @@ const handleSubmit = async () => {
       }
 
 
-      emit('auth-success', { email: data.email });
+      emit('auth-success', { email: data.email, token: data.token });
       
     } else {
       const response = await fetch(`${BACKEND_URL}/register`, {
@@ -112,7 +112,7 @@ const handleSubmit = async () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data || 'Nie udało się zarejestrować!');
+        throw new Error(data.message || 'Nie udało się zarejestrować!');
       }
 
       alert("Konto założone pomyślnie w bazie Manticore! Teraz możesz się zalogować.");
@@ -257,6 +257,5 @@ const handleSubmit = async () => {
 .modal-footer a:hover {
   text-decoration: underline;
 }
-</style>
 </style>
 

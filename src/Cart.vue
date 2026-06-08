@@ -66,6 +66,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import { useCart } from '@/store/cart';
+import { getAuthHeaders } from '@/utils/auth';
 
 const router = useRouter();
 const { items, count, total, addToCart, decrease, removeFromCart, clearCart } = useCart();
@@ -80,15 +81,10 @@ const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
 
 async function submitOrder() {
   errorMessage.value = '';
-  const userEmail = localStorage.getItem('manticore_user') || 'Niezalogowany';
-
   const orderData = {
-    userEmail: userEmail,
-    totalPrice: total.value,
     orderItems: items.value.map(item => ({
-      productId: item.id,
-      productName: item.nazwa,
-      price: item.parsedPrice,
+      itemId: item.id,
+      itemType: item.itemType || 'product',
       quantity: item.quantity
     }))
   };
@@ -97,20 +93,18 @@ async function submitOrder() {
     isSubmitting.value = true;
     const response = await fetch('https://localhost:7294/api/orders', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(orderData)
     });
 
-    if (!response.ok) {
-      throw new Error('Wystąpił problem z serwerem podczas składania zamówienia.');
-    }
-
     const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Wystąpił problem z serwerem podczas składania zamówienia.');
+    }
     
     if (result.success) {
-      alert(`Sukces! ${result.message} ID zamówienia: ${result.orderId}`);
+      alert(`Sukces! ${result.message} ID zamówienia: ${result.orderId}. Suma: ${result.totalPrice} zł`);
       clearCart();
       router.push('/');
     }

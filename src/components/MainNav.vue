@@ -71,6 +71,7 @@ import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import AuthModal from './AuthModal.vue'
+import { isLoggedIn as hasAuthToken, getUserEmail, saveAuth, clearAuth } from '@/utils/auth'
 
 const isNavOpen = ref(false)
 const isAuthModalOpen = ref(false)
@@ -87,26 +88,25 @@ onMounted(() => {
 })
 
 function checkLoginStatus() {
-  const savedEmail = localStorage.getItem('manticore_user')
-  if (savedEmail) {
+  if (hasAuthToken()) {
     isLoggedIn.value = true
-    userEmail.value = savedEmail
+    userEmail.value = getUserEmail()
   } else {
     isLoggedIn.value = false
     userEmail.value = ''
   }
 }
 
-function handleAuthSuccess(userData: { email: string }) {
+function handleAuthSuccess(userData: { email: string; token: string }) {
   isAuthModalOpen.value = false
-  localStorage.setItem('manticore_user', userData.email)
+  saveAuth(userData)
   checkLoginStatus()
   alert(`Zalogowano pomyślnie jako: ${userData.email}`)
   window.dispatchEvent(new Event('storage'))
 }
 
 function handleLogout() {
-  localStorage.removeItem('manticore_user')
+  clearAuth()
   checkLoginStatus()
   alert('Wylogowano z restauracji Manticore.')
   window.dispatchEvent(new Event('storage'))

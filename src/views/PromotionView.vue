@@ -9,36 +9,41 @@
     </header>
 
     <div class="promotions-container">
-      <div class="promotions-grid">
-        <PromotionCard 
-          v-for="promo in basicPromotions" 
-          :key="promo.id" 
-          :item="promo"
-          @add-to-cart="handleAddToCart"
-        />
-      </div>
+      <p v-if="loading" class="status-msg">Ładowanie promocji…</p>
+      <p v-else-if="error" class="status-msg-error">{{ error }}</p>
 
-      <div v-if="showMore" class="premium-section">
-        <div class="section-divider">
-          <span>Strefa Klubowicza Manticore</span>
-        </div>
-        
+      <template v-else>
         <div class="promotions-grid">
           <PromotionCard 
-            v-for="promo in premiumPromotions" 
+            v-for="promo in basicPromotions" 
             :key="promo.id" 
             :item="promo"
-            @add-to-cart="handlePremiumClick"
+            @add-to-cart="handleAddToCart"
           />
         </div>
-      </div>
 
-      <div class="actions-row" v-if="!showMore">
-        <button class="show-more-btn" @click="showMore = true">
-          Pokaż więcej promocji
-          <Icon icon="mdi:chevron-down" width="20" height="20" />
-        </button>
-      </div>
+        <div v-if="showMore" class="premium-section">
+          <div class="section-divider">
+            <span>Strefa Klubowicza Manticore</span>
+          </div>
+          
+          <div class="promotions-grid">
+            <PromotionCard 
+              v-for="promo in premiumPromotions" 
+              :key="promo.id" 
+              :item="promo"
+              @add-to-cart="handlePremiumClick"
+            />
+          </div>
+        </div>
+
+        <div class="actions-row" v-if="!showMore">
+          <button class="show-more-btn" @click="showMore = true">
+            Pokaż więcej promocji
+            <Icon icon="mdi:chevron-down" width="20" height="20" />
+          </button>
+        </div>
+      </template>
     </div>
 
     <CartPopup />
@@ -49,8 +54,6 @@
       @auth-success="handleAuthSuccess"
     />
   </div>
-  
-  
 </template>
 
 <script setup>
@@ -60,93 +63,51 @@ import AuthModal from '@/components/AuthModal.vue';
 import CartPopup from '@/components/CartPopup.vue';
 import { Icon } from '@iconify/vue';
 import { useCart } from '@/store/cart';
+import { isLoggedIn, saveAuth, getAuthHeaders } from '@/utils/auth';
 
 const { addToCart } = useCart();
 
 const showMore = ref(false);
 const isAuthModalOpen = ref(false);
-const isLoggedIn = ref(false);
+const loading = ref(true);
+const error = ref('');
+const basicPromotions = ref([]);
+const premiumPromotions = ref([]);
 
-const basicPromotions = ref([
-  {
-    id: 1,
-    nazwa: "Zestaw dla dziecka",
-    opis: "Nuggetsy z frytkami i colą 0,33l w super cenie. Idealny zestaw dla najmłodszych smakoszy.",
-    parsedPrice: 30.49,
-    imageUrl: "https://heisenburger.pl/uploads/images/products/org/11.jpg",
-    isLocked: false 
-  },
-  {
-    id: 2,
-    nazwa: "2x Burger Wege",
-    opis: "Zniżka 30% na drugiego burgera Wege.",
-    parsedPrice: 53.35,
-    imageUrl: "https://www.frosta.pl/wp-content/uploads/sites/4/2020/11/shutterstock_794244805_Wege-burger-z-guacamole-scaled.jpg",
-    isLocked: false
-  },
-  {
-    id: 3,
-    nazwa: "Chrupiący Box Przekąsek",
-    opis: "Frytki, kurczaczki w sosie ostrym, krązki cebulowe i 2 autorskie sosy.",
-    parsedPrice: 34.99,
-    imageUrl: "https://papupos.s3.amazonaws.com/media/company/143b6abe-d23b-406d-854d-1a2412edd69d/images/c41d545b-542a-4492-a7e4-dd5f01e5be11.png",
-    isLocked: false
-  }
-]);
+async function loadPromotions() {
+  loading.value = true;
+  error.value = '';
 
-const premiumPromotions = ref([
-  {
-    id: 4,
-    nazwa: "Łosoś Grillowany",
-    opis: "Zniżka 9zł na najpyszniejszą rybę w Polsce. Oferta dla klubowiczów.",
-    parsedPrice: 43.00,
-    imageUrl: "https://saproduwielbiaplmmedia.blob.core.windows.net/media/recipes/images/1699973472780.jpeg",
-    isLocked: true 
-  },
-  {
-    id: 5,
-    nazwa: "Frytki z batata",
-    opis: "Zniżka 5zł na słodkie chrupiące frytki z batata. Oferta dla klubowiczów.",
-    parsedPrice: 9.00,
-    imageUrl: "https://az.przepisy.pl/www-przepisy-pl/www.przepisy.pl/przepisy3ii/img/variants/800x0/frytki_z_marchewki_0994803.jpg",
-    isLocked: true
-  },
-  {
-    id: 6,
-    nazwa: "Burger klasyczny XL",
-    opis: "Powiększony o 80gr mięsa burger klasyczny. Oferta dla klubowiczów.",
-    parsedPrice: 32.99,
-    imageUrl: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80",
-    isLocked: true
-  }
-]);
+  try {
+    const [basicRes, premiumRes] = await Promise.all([
+      fetch('https://localhost:7294/api/promotions'),
+      fetch('https://localhost:7294/api/promotions/premium', { headers: getAuthHeaders() }),
+    ]);
 
-onMounted(() => {
-  checkLoginStatus();
-  window.addEventListener('storage', checkLoginStatus);
-});
+    if (!basicRes.ok || !premiumRes.ok) {
+      throw new Error('Nie udało się pobrać promocji z serwera.');
+    }
 
-function checkLoginStatus() {
-  const savedEmail = localStorage.getItem('manticore_user');
-  if (savedEmail) {
-    isLoggedIn.value = true;
-    premiumPromotions.value.forEach(promo => {
-      promo.isLocked = false;
-    });
-  } else {
-    isLoggedIn.value = false;
-    premiumPromotions.value.forEach(promo => {
-      promo.isLocked = true;
-    });
+    basicPromotions.value = await basicRes.json();
+    premiumPromotions.value = await premiumRes.json();
+  } catch (err) {
+    error.value = err.message || 'Brak połączenia z serwerem bazy danych.';
+  } finally {
+    loading.value = false;
   }
 }
+
+onMounted(() => {
+  loadPromotions();
+  window.addEventListener('storage', loadPromotions);
+});
 
 const handleAddToCart = (item) => {
   addToCart(item);
 };
 
 const handlePremiumClick = (item) => {
-  if (isLoggedIn.value) {
+  if (isLoggedIn() && !item.isLocked) {
     addToCart(item);
   } else {
     isAuthModalOpen.value = true;
@@ -155,10 +116,10 @@ const handlePremiumClick = (item) => {
 
 const handleAuthSuccess = (userData) => {
   isAuthModalOpen.value = false;
-  localStorage.setItem('manticore_user', userData.email);
-  checkLoginStatus();
+  saveAuth(userData);
+  loadPromotions();
   window.dispatchEvent(new Event('storage'));
-  alert(`Witaj w klubie Manticore! Wszystkie promocje zostały odblokowane.`);
+  alert('Witaj w klubie Manticore! Wszystkie promocje zostały odblokowane.');
 };
 </script>
 
@@ -223,6 +184,19 @@ const handleAuthSuccess = (userData) => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 35px;
+}
+
+.status-msg {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.status-msg-error {
+  text-align: center;
+  padding: 20px;
+  color: #e30613;
+  font-weight: bold;
 }
 
 .actions-row {
