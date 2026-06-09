@@ -8,7 +8,7 @@
 
       <div class="modal-header">
         <h2>{{ isLoginMode ? 'Logowanie do Manticore' : 'Załóż konto w Manticore' }}</h2>
-        <p>{{ isLoginMode ? 'Zaloguj się, aby odblokować oferty klubowe.' : 'Dołącz do klubu i kupuj menu Sfinksa 50% taniej!' }}</p>
+        <p>{{ isLoginMode ? 'Zaloguj się, aby odblokować oferty klubowe.' : 'Dołącz do klubu i kupuj oferty nawet do 50% taniej!' }}</p>
       </div>
 
       <form @submit.prevent="handleSubmit" class="auth-form">

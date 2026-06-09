@@ -14,7 +14,7 @@
 
       <template v-else>
         <div class="promotions-grid">
-          <PromotionCard 
+          <MenuCard 
             v-for="promo in basicPromotions" 
             :key="promo.id" 
             :item="promo"
@@ -27,11 +27,11 @@
                   class="add-btn"
                   @click="handleAddToCart(slotItem)"
                 >
-                  <Icon icon="fe:add-cart" width="24" />
+                  <Icon icon="fe:add-cart" width="24" height="24" />
                 </button>
               </Transition>
             </template>
-          </PromotionCard>
+          </MenuCard>
         </div>
 
         <div v-if="showMore" class="premium-section">
@@ -82,6 +82,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import MenuCard from '@/components/MenuCard.vue';
 import PromotionCard from '@/components/PromotionCard.vue';
 import AuthModal from '@/components/AuthModal.vue';
 import CartPopup from '@/components/CartPopup.vue';
