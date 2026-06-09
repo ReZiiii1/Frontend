@@ -20,16 +20,16 @@
             </div>
 
             <div class="number-controls">
-              <button type="button" class="qty-btn" @click="decrease(item.id)">-</button>
+              <button type="button" class="qty-btn" @click="cart.decrease(item.id)">-</button>
               <span class="qty-number">{{ item.quantity }}</span>
-              <button type="button" class="qty-btn" @click="addToCart(item)">+</button>
+              <button type="button" class="qty-btn" @click="cart.addToCart(item)">+</button>
             </div>
 
             <div class="item-total-price">
               {{ formatPrice(item.parsedPrice * item.quantity) }} zł
             </div>
 
-            <button type="button" class="remove-btn" @click="removeFromCart(item.id)">
+            <button type="button" class="remove-btn" @click="cart.removeFromCart(item.id)">
               <Icon icon="mdi:trash-can-outline" width="20" height="20" />
             </button>
           </div>
@@ -69,7 +69,9 @@ import { useCart } from '@/store/cart';
 import { getAuthHeaders } from '@/utils/auth';
 
 const router = useRouter();
-const { items, count, total, addToCart, decrease, removeFromCart, clearCart } = useCart();
+const cart = useCart();
+
+const { items, count, total } = cart;
 
 const isSubmitting = ref(false);
 const errorMessage = ref('');
@@ -105,7 +107,7 @@ async function submitOrder() {
     
     if (result.success) {
       alert(`Sukces! ${result.message} ID zamówienia: ${result.orderId}. Suma: ${result.totalPrice} zł`);
-      clearCart();
+      cart.clearCart();
       router.push('/');
     }
   } catch (err) {
@@ -165,7 +167,6 @@ async function submitOrder() {
 .cart-items-list {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   padding: 15px;
 }
 
@@ -256,7 +257,6 @@ async function submitOrder() {
   border-radius: 12px;
   padding: 25px;
   height: fit-content;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .cart-summary h2 {

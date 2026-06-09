@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import RestaurantCard from './components/RestaurantCard.vue';
 import RestaurantSearch from './components/RestaurantSearch.vue';
 import {Icon} from '@iconify/vue';
@@ -10,16 +10,31 @@ const restaurants = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
 const error = ref('');
+const results = ref(0);
 
 const filteredRestaurants = computed(() => {
   const query = searchQuery.value.toLowerCase().trim();
   
   if (!query) return restaurants.value; 
 
-  return restaurants.value.filter(r => {
-    return r.miejscowosc && r.miejscowosc.toLowerCase().includes(query);
-  });
+  return restaurants.value.filter(r =>
+     r.miejscowosc?.toLowerCase().includes(query)
+  )
 });
+
+watch(filteredRestaurants, (list) => {
+  results.value = list.length
+}, { immediate: true })
+
+function getRestaurantForm(count) {
+  if (count === 1) return 'restaurację';
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+  if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 10 || lastTwoDigits >= 20)) {
+    return 'restauracje';
+  }
+  return 'restauracji';
+}
 
 async function loadRestaurants() {
   loading.value = true;
@@ -52,7 +67,7 @@ onMounted(loadRestaurants);
       <RestaurantSearch v-model="searchQuery" />
     </section>
 
-    <main class="restaurants-container">
+<main class="restaurants-container">
       <p v-if="loading" class="status-msg">Ładowanie listy restauracji…</p>
       <p v-else-if="error" class="status-msg-error">{{ error }}</p>
 
@@ -61,13 +76,19 @@ onMounted(loadRestaurants);
           Nie znaleźliśmy żadnej restauracji w wyszukiwanej przez ciebie miejscowości. <Icon icon="pixel:face-sad-solid" color="white" width="15" />
         </p>
 
-      <div v-else class="items-grid">
-        <RestaurantCard
-          v-for="restaurant in filteredRestaurants" 
-          :key="restaurant.id" 
-          :item="restaurant"
-        />
-      </div>
+        <div v-else>
+          <p class="results-counter">
+            Znaleziono {{ results }} {{ getRestaurantForm(results) }}
+          </p>
+
+          <div class="items-grid">
+            <RestaurantCard
+              v-for="restaurant in filteredRestaurants" 
+              :key="restaurant.id" 
+              :item="restaurant"
+            />
+          </div>
+        </div>
       </div>
     </main>
   </div>

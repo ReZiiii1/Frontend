@@ -64,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import AuthModal from './AuthModal.vue'
@@ -107,12 +107,6 @@ function handleLogout() {
   checkLoginStatus()
   alert('Wylogowano z restauracji Manticore.')
   window.dispatchEvent(new Event('storage'))
-}
-</script>
-
-<script lang="ts">
-export default {
-  name: 'NavbarComponent'
 }
 </script>
 

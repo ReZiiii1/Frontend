@@ -3,12 +3,13 @@ import { ref, computed, onMounted } from 'vue';
 import CategoryNav from './components/CategoryNav.vue';
 import MenuCard from './components/MenuCard.vue';
 import CartPopup from './components/CartPopup.vue'; 
+import { Icon } from '@iconify/vue';
 import { categories } from './utils/Categories';
 import { useCart } from './store/cart';
 
 const apiBase = 'https://localhost:7294';
 
-const { addToCart } = useCart();
+const cart = useCart();
 
 const productsRaw = ref([]);
 const menuLoading = ref(true);
@@ -46,7 +47,7 @@ async function loadMenu() {
 }
 
 function handleAddToCart(item) {
-  addToCart(item);
+  cart.addToCart(item); 
 }
 
 function scrollToCategory(id) {
@@ -86,11 +87,22 @@ onMounted(loadMenu);
 
         <div class="items-grid">
           <MenuCard
-            v-for="item in cat.items" 
-            :key="item.id" 
+            v-for="item in cat.items"
+            :key="item.id"
             :item="item"
-            @add-to-cart="handleAddToCart"
-          />
+          >
+            <template #actions="{ item: slotItem, hovered }">
+              <Transition name="fade">
+                <button
+                  v-show="hovered"
+                  type="button"
+                  class="add-btn" @click="handleAddToCart(slotItem)"
+                >
+                  <Icon icon="fe:add-cart" width="24" height="24" />
+                </button>
+              </Transition>
+            </template>
+          </MenuCard>
         </div>
       </section>
     </main>

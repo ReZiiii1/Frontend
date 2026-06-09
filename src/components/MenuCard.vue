@@ -1,30 +1,25 @@
 <template>
-  <article
+  <article 
     class="menu-card"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
-  >
+    >
     <div
       class="item-image"
       :style="{ backgroundImage: `url(${item.imageUrl})` }"
-      role="img"
-      :aria-label="item.nazwa"
-    ></div>
+      >
+      <slot name="badge" />
+    </div>
     <div class="item-info">
       <h3>{{ item.nazwa }}</h3>
       <p class="description">{{ item.opis }}</p>
       <div class="price-row">
-        <span class="price">{{ formatPrice(item.parsedPrice) }} zł</span> 
-        <Transition name="fade">
-          <button 
-            v-show="isHovered" 
-            type="button" 
-            class="add-btn" 
-            @click="$emit('add-to-cart', item)"
-          >
-            <Icon icon="fe:add-cart" width="24" height="24" />
-          </button>
-        </Transition>
+        <span class="price">{{ formatPrice(item.parsedPrice) }} zł</span>
+        <slot
+          name="actions"
+          :item="item"
+          :hovered="isHovered" 
+          />
       </div>
     </div>
   </article>
@@ -101,7 +96,7 @@ const formatPrice = (val) => new Intl.NumberFormat('pl-PL', {
   font-size: 0.95rem;
 }
 
-.add-btn {
+:deep(.add-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;

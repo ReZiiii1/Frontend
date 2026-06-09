@@ -18,8 +18,20 @@
             v-for="promo in basicPromotions" 
             :key="promo.id" 
             :item="promo"
-            @add-to-cart="handleAddToCart"
-          />
+          >
+            <template #actions="{ item: slotItem, hovered }">
+              <Transition name="fade">
+                <button
+                  v-show="hovered"
+                  type="button"
+                  class="add-btn"
+                  @click="handleAddToCart(slotItem)"
+                >
+                  <Icon icon="fe:add-cart" width="24" />
+                </button>
+              </Transition>
+            </template>
+          </PromotionCard>
         </div>
 
         <div v-if="showMore" class="premium-section">
@@ -32,8 +44,20 @@
               v-for="promo in premiumPromotions" 
               :key="promo.id" 
               :item="promo"
-              @add-to-cart="handlePremiumClick"
-            />
+            >
+              <template #actions="{ item: slotItem, hovered }">
+                <Transition name="fade">
+                  <button
+                    v-show="hovered"
+                    type="button"
+                    class="add-btn"
+                    @click="handlePremiumClick(slotItem)"
+                  >
+                    <Icon :icon="slotItem.isLocked ? 'mdi:lock' : 'fe:add-cart'" width="24" />
+                  </button>
+                </Transition>
+              </template>
+            </PromotionCard>
           </div>
         </div>
 
@@ -65,7 +89,7 @@ import { Icon } from '@iconify/vue';
 import { useCart } from '@/store/cart';
 import { isLoggedIn, saveAuth, getAuthHeaders } from '@/utils/auth';
 
-const { addToCart } = useCart();
+const cart = useCart();
 
 const showMore = ref(false);
 const isAuthModalOpen = ref(false);
@@ -103,12 +127,12 @@ onMounted(() => {
 });
 
 const handleAddToCart = (item) => {
-  addToCart(item);
+  cart.addToCart(item);
 };
 
 const handlePremiumClick = (item) => {
   if (isLoggedIn() && !item.isLocked) {
-    addToCart(item);
+    cart.addToCart(item);
   } else {
     isAuthModalOpen.value = true;
   }
